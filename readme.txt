@@ -16,15 +16,13 @@ http://www.remakes.org/
 
 _______________________________
 
-ABOUT THIS REMAKE
+Another unfinished project now uploaded to git for anyone to mess with.
 
-All entries must include a readme.txt explaining everything there is to know about the game. What is it a remake of, what do you have to do, what are the controls, any details about the authors, that sort of thing.
+The game is more or less playable and completable: graphics remain unfinished. As a Blitz3D game, I’m not sure if it would run at all in modern versions of Windows, and I’m unable to test this in any way.
 
-Like it's predecessor 'Hacker', 'Hacker 2' 
+Gameplay mechanics were meticulously backward-engineered: guard timings and routes are identical to the original game.
 
-'Hacker 2' is not a game you can jump quickly into.
-
-I've also included the original manual (see the 'MSFM Operational Aspects' textfile), which is as relevent to the remake as it was to the original. I recommend you read it.
+I've included the original manual (see the 'MSFM Operational Aspects' textfile), which is as relevant to the remake as it was to the original.
 
 _______________________________
 
