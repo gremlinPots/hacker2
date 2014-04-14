@@ -1,0 +1,128 @@
+Graphics3D 640,480
+SetBuffer BackBuffer()
+
+camera=CreateCamera()
+light=CreateLight()
+
+RotateEntity camera,90,0,0
+
+; camera position values (unimportant)
+cx#=19.6
+cy#=17.6
+cz#=-13.2
+
+PositionEntity camera,cx#,cy#,cz#
+
+;Creating the floor (not all walkable areas are visible)
+;Horizontals
+CreateFloor(3.5,-3.5,32,1)
+CreateFloor(4.5,-12.5,9,1)
+CreateFloor(4.5,-17.5,9,1)
+CreateFloor(3.5,-20.5,11,1)
+CreateFloor(17.5,-20.5,18,1)
+CreateFloor(28.5,-17.5,6,1)
+CreateFloor(28.5,-12.5,6,1)
+
+;Verticals
+CreateFloor(3.5,-4.5,1,16)
+CreateFloor(13.5,-4.5,1,16)
+CreateFloor(17.5,-4.5,1,16)
+CreateFloor(27.5,-4.5,1,16)
+CreateFloor(34.5,-4.5,1,16)
+CreateFloor(24.5,-21.5,1,3)
+
+;Target coordinates
+mrux#=4
+mruz#=-7
+
+;Temporary target object
+mru=CreateCube()
+EntityColor mru,0,0,255
+ScaleEntity mru,0.5,1,0.5
+PositionEntity mru,mrux#,1,mruz#
+
+;Temporary annihilator object
+ann=CreateCube()
+EntityColor ann,0,255,0
+annx#=16
+annz#=-4
+ScaleEntity ann,0.5,1,0.5
+PositionEntity ann,annx#,1,annz#
+annmovespeed#=0.015
+
+
+
+;Array, 38 by 25
+Dim walkability(38,25)
+
+;Loading images into array
+;Because ReadPixel is used, walkable areas become '-1' and unwalkable '-16777216'
+bmp=LoadImage("bitmap.bmp")
+For i=1 To 38
+	For v=1 To 25
+		walkability(i,v)=ReadPixel(i-1,v-1,ImageBuffer(bmp))
+	Next
+Next
+
+Include "aStarLibrary2.bb"
+
+;---------------------
+;Game Loop
+;---------------------
+While Not KeyDown(1)
+
+;When you press space, start the movement
+If KeyDown( 57 )=True
+
+;Move the annihalator
+
+	;If the annihalator is not in the same position as the target, move it
+	If EntityX#(mru) <> EntityX#(ann) Or EntityZ#(mru) <> EntityZ#(ann) ;;;;;;;;;;;;;;changed AND to OR
+	
+		If pathStatus(1) = notstarted Or pathlocation(ID) = 3
+
+			PathStatus(1) = findPath(1,annx#,annz#*-1,EntityX#(mru),EntityZ#(mru)*-1)
+						
+		End If
+
+		readPath(1,EntityX#(ann),EntityZ#(ann)*-1,annmovespeed#)
+	
+		If annx# > xPath(1) Then annx# = annx# - annmovespeed#
+		If annx# < xPath(1) Then annx# = annx# + annmovespeed#
+		If annz#*-1 > yPath(1) Then annz# = annz# + annmovespeed#  ;;;;;;;;;;;;;;changed + to -
+		If annz#*-1 < yPath(1) Then annz# = annz# - annmovespeed#  ;;;;;;;;;;;;;;changed - to +
+
+	End If
+	
+EndIf
+
+PositionEntity ann,annx#,1,annz#
+
+
+UpdateWorld
+RenderWorld
+
+Flip
+
+Wend
+
+End
+
+
+;FUNCTIONS
+;------------
+;Floor Pieces:
+;------------
+Function CreateFloor(xpos#,zpos#,x#,z#)
+sprite=CreateMesh()
+he=CreateBrush(255,255,255)
+v=CreateSurface(sprite,he)
+FreeBrush he
+AddVertex ( v,xpos#,0,zpos#,1,1)
+AddVertex ( v,xpos#+x#,0,zpos#,0,0)
+AddVertex ( v,xpos#+x#,0,zpos#-z#,1,0)
+AddVertex ( v,xpos#,0,zpos#-z#,0,1)
+AddTriangle( v,0,1,2)
+AddTriangle( v,2,3,0)
+Return sprite
+End Function

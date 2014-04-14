@@ -1,0 +1,64 @@
+;Variables dealing with the Text String
+
+Global sTxt$ = "This is the text string intended to test the 'typing' effect"
+
+Global iTxtIdx% = 1
+
+Global iTxtLen% = Len(sTxt)
+
+Global sCurs$ = "_"
+
+; Variables dealing with line length and screen position
+
+Global iXBase% = 10
+
+Global iYBase% = 10
+
+Global iXLoc% = iXBase
+
+Global iYLoc% = iYBase
+
+Global iCursSpace% = 8
+
+; Timing Variables
+
+Global iCursor% = 0
+
+Global iCursDelay% = 20
+
+Global iType% = 0
+
+Global iTypeDelay% = 20
+
+; Set up graphics
+
+Graphics 800, 600, 16, 2
+SetBuffer BackBuffer()
+
+; Main loop
+Repeat
+  Cls
+  Color 0, 255, 0
+  ; Update the text string
+  If iType > 0 Then
+	Text iXLoc, iYLoc, Mid$(sTxt$, 1, iTxtIdx), False, False
+	    If iType >= iTypeDelay Then
+	      iType = iType - iTypeDelay
+	      iTxtIdx = iTxtIdx + 1
+	      If iTxtIdx > iTxtLen Then Exit
+	    End If
+	  End If
+	  iType = iType + 1
+	  ; Update the cursor blinking state
+	  If iCursor > 0 Then
+	    Text iXLoc + iCursSpace * iTxtIdx, iYLoc, sCurs, False, False
+	    If iCursor >= iCursDelay Then iCursor = - iCursDelay
+	  End If
+	  iCursor = iCursor + 1
+	  ; Show the buffer
+	  Flip
+	  ; Exit the loop if we hit esc before the program is ended
+	  If KeyHit(1) Then Exit
+	Forever
+	; Quit the app
+	End

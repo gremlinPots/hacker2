@@ -1,0 +1,6 @@
+Hacker 2 is not a game that can be quickly picked up and played. Even after reading the User Manual, which takes the place of a game manual, a new player will feel like they've been thrown in at the deep end, with little idea of what they're supposed to do and even less as to how they're supposed to go about it.
+Remaking the game, I had the choice to change this. Gameplay could have been simplified, obstacles removed, a greater explanation of the goals given. But I took the decision to make this a remake as faithful to the original as possible, updating simply the graphics and sound to that of a more modern game.
+For this reason, I was wary of choosing it for the competition.
+
+Hacker 2 was released in 1986 on the...
+It is the Amiga version that the remake is based on, having mouse control rather than joystick. The differences between the original versions were simply in design of the MSFM screen - timings, floor layouts and ... are identical - and the remake is no different.

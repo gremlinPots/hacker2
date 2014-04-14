@@ -1,0 +1,104 @@
+Graphics3D 640,480
+SetBuffer BackBuffer()
+
+camera=CreateCamera()
+light=CreateLight()
+
+;Variables
+timecheck=MilliSecs()
+secs=0
+mins=0
+completesecs=0
+fakemins=0
+milli=0
+secss$="00"
+minss$="00"
+millicount=MilliSecs()
+secmonb=31
+clockspeed=10
+
+
+
+While Not KeyDown(1)
+
+;Update the clock
+If MilliSecs() > millicount + 10
+	
+If clockspeed >= 0
+	If milli >=59
+		milli=0
+		If secs >= 59
+			secs=0
+			completesecs=completesecs+1
+			If fakemins >= 59
+				secs=0
+				completesecs=completesecs+1
+				fakemins=0
+				mins=0
+			Else
+				fakemins=fakemins+1
+				If mins >= 4 : mins=0 : Else : mins=mins+1 : EndIf
+			EndIf
+		Else
+			secs=secs+1
+			completesecs=completesecs+1
+		EndIf
+	Else
+		milli=milli+clockspeed
+	EndIf
+	
+Else ;If the clockspeed is not greater than 0 (going backwards)
+	
+	If milli <=0
+		milli=59
+		If secs <= 0
+			secs=59
+			completesecs=completesecs-1
+			If fakemins <= 0
+				secs=59
+				completesecs=completesecs-1
+				fakemins=59
+				mins=59
+			Else
+				fakemins=fakemins-1
+				If mins <= 0 : mins=4 : Else : mins=mins-1 : EndIf
+			EndIf
+		Else
+			secs=secs-1
+			completesecs=completesecs-1
+		EndIf
+	Else
+		milli=milli+clockspeed
+	EndIf
+
+EndIf ;If clockspeed > 0
+	
+If secs < 10 : secss$="0"+secs : Else : secss$=secs : EndIf
+If fakemins < 10 : minss$="0"+fakemins : Else : minss$=fakemins : EndIf
+millicount=MilliSecs()
+	
+EndIf
+
+
+If MouseDown(1)
+	clockspeed=-10
+Else
+	clockspeed=10
+EndIf
+
+
+
+UpdateWorld
+RenderWorld
+
+
+Text 0,0,"Clock: "+minss$+" : "+secss$
+Text 0,10,"Real Time: "+mins+" : "+secs+" : "+milli
+Text 0,30,"Clock Speed: " +clockspeed
+
+
+Flip
+
+Wend
+
+End

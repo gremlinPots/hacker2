@@ -1,0 +1,641 @@
+Graphics3D 640,480;,32,1
+SetBuffer BackBuffer()
+
+cam1=CreateCamera()
+cam2=CreateCamera()
+cam3=CreateCamera()
+cam4=CreateCamera()
+
+light=CreateLight()
+
+; camera position values (unimportant)
+cx#=0
+cy#=0
+cz#=-5
+
+CameraClsColor cam1,255,0,0
+CameraClsColor cam2,0,255,0
+CameraClsColor cam3,0,0,255
+CameraClsColor cam4,255,255,0
+
+CameraViewport cam1,77,19,212,140
+CameraViewport cam2,397,19,212,140
+CameraViewport cam3,77,223,212,140
+CameraViewport cam4,397,223,212,140
+
+PositionEntity cam1,cx#,cy#,cz#
+PositionEntity cam2,cx#,cy#,cz#
+PositionEntity cam3,cx#,cy#,cz#
+PositionEntity cam4,cx#,cy#,cz#
+
+sphere1=CreateSphere() : PositionEntity sphere1,-3,0,0
+sphere2=CreateSphere() : PositionEntity sphere2,-1,0,0
+sphere3=CreateSphere() : PositionEntity sphere3,1,0,0
+sphere4=CreateSphere() : PositionEntity sphere4,3,0,0
+
+;Creating the 4 images that each camera will be rendered to
+port1=CreateImage(212,140)
+port2=CreateImage(212,140)
+port3=CreateImage(212,140)
+port4=CreateImage(212,140)
+
+;Declaring arrays, so that the camera and sphere names can be referenced
+Dim sphere(4):sphere(1)=sphere1:sphere(2)=sphere2:sphere(3)=sphere3:sphere(4)=sphere4
+Dim cam(4):cam(1)=cam1:cam(2)=cam2:cam(3)=cam3:cam(4)=cam4
+Dim port(4):port(1)=port1:port(2)=port2:port(3)=port3:port(4)=port4
+Dim portxpos(4):portxpos(1)=77:portxpos(2)=397:portxpos(3)=77:portxpos(4)=397
+Dim portypos(4):portypos(1)=19:portypos(2)=19:portypos(3)=223:portypos(4)=223
+
+SeedRnd MilliSecs() ;Seed the random number generator
+
+;Variables
+monselected=1
+
+;Vhold variables (needs to be 1 for each viewport) - in arrays, again
+
+Dim vholdpos#(4):vholdpos#(1)=0:vholdpos#(2)=0:vholdpos#(3)=0:vholdpos#(4)=0
+Dim vholdspeed#(4):vholdspeed#(1)=Int(Rnd(-8,10))*4:vholdspeed#(2)=Int(Rnd(-8,10))*4:vholdspeed#(3)=Int(Rnd(-8,10))*4:vholdspeed#(4)=Int(Rnd(-8,10))*4
+
+bandheight=12
+
+guilayer=LoadImage("gui.png") ;Load the GUI graphic
+MaskImage guilayer,0,0,255
+
+cursor=LoadImage("cursor.png") ;Load the cursor, set transparancy and hide the windows pointer
+MaskImage cursor,0,17,119
+HidePointer
+
+;Text variables and bits
+textbackground=CreateImage(640,480)
+SetBuffer ImageBuffer(textbackground)
+Color 0,0,170
+Rect 0,0,640,480
+Color 255,255,255
+SetBuffer BackBuffer()
+textlayer=CreateImage(640,480)
+
+textleftoffset=30 ;pixel gap to leave between the left margin (multiple of 10)
+
+;Images that will be used in the text
+mrupic=LoadImage("mrupic.bmp")
+mfsmpic=LoadImage("mfsmpic.bmp")
+;Text variables and actual game text
+fntcourier=LoadFont ("Courier",20,True,False,False) 
+SetFont fntcourier
+normaltypepause=90
+quicktypepause=30
+typepause=normaltypepause
+
+time=MilliSecs()
+
+linecount=184
+Dim msg$(linecount,1)
+msg(0,0)=" " : msg (0,1)="DIAL"
+msg(1,0)="(CONNECTED)" : msg(1,1)=0
+msg(2,0)="" : msg(2,1)="PAU4"
+msg(3,0)="* H2 - PLUS VERSION 2.0 *" : msg(3,1)=20
+msg(4,0)="LICENSE #0480-0171-HCK2" : msg(4,1)=40
+msg(5,0)="" : msg(5,1)="PAU1"
+msg(6,0)="LOGON PLEASE:" : msg(6,1)=80
+msg(7,0)="" : msg(7,1)="LOGON"
+msg(8,0)="              " : msg(8,1)=80
+msg(9,0)="" : msg(9,1)="RESETP"
+msg(10,0)="" : msg(10,1)="PAU2"
+msg(11,0)="REQUEST RECORDED" : msg(11,1)=100
+msg(12,0)="" : msg(12,1)="PAU1"
+msg(13,0)="ONE MOMENT, PLEASE" : msg(13,1)=120
+msg(14,0)="" : msg(14,1)="PAU6"
+msg(15,0)="THANK YOU FOR WAITING" : msg(15,1)=160
+msg(16,0)="" : msg(16,1)="PAU1"
+msg(17,0)="" : msg(17,1)="CLS"
+msg(18,0)="      Welcome To Actisource" : msg(18,1)=0
+msg(19,0)="The International Computer Hotline" : msg(19,1)=20
+msg(20,0)="     Copyright (C) 1986-2003" : msg(20,1)=40
+msg(21,0)="     Actisource Incorperated" : msg(21,1)=60
+msg(22,0)="       all rights reserved" : msg(22,1)=80
+msg(23,0)="****** WHAT'S NEW THIS WEEK *******" : msg(23,1)=120
+msg(24,0)="1. This week's TOP 10" : msg(24,1)=160
+msg(25,0)="2. Reviews of bestselling software" : msg(25,1)=180
+msg(26,0)="3. Interview with Brad Fregger..." : msg(26,1)=200
+msg(27,0)="   Activision Producer" : msg(27,1)=220
+msg(28,0)="4. Tips from p" : msg(28,1)=240
+msg(29,0)="" : msg(29,1)="PAU6"
+msg(30,0)="TRANSMISSION INTERRUPTED" : msg(30,1)=280
+msg(31,0)="" : msg(31,1)="PAU1"
+msg(32,0)="PLEASE STAND BY" : msg(32,1)=300
+msg(33,0)="" : msg(33,1)="PAU4"
+msg(34,0)="" : msg(34,1)="CLS"
+msg(35,0)="" : msg(35,1)="SETQUICKP"
+msg(36,0)="Greetings from the Government of the" : msg(36,1)=0
+msg(37,0)="     United States of America" : msg(37,1)=20
+msg(38,0)="" : msg(38,1)="PAU3"
+msg(39,0)="Since you have been recognized as" : msg(39,1)=60
+msg(40,0)="the world's leading authority on" : msg(40,1)=80
+msg(41,0)="computer security systems, the" : msg(41,1)=100
+msg(42,0)="Central Intelligence Agency wishes to" : msg(42,1)=120
+msg(43,0)="enlist you in its efforts to combat" : msg(43,1)=140
+msg(44,0)="International terrorism." : msg(44,1)=160
+msg(45,0)="" : msg(45,1)="PAU2"
+msg(46,0)="Please press (RETURN) to indicate" : msg(46,1)=200
+msg(47,0)="your acceptance of the assignment." : msg(47,1)=220
+msg(48,0)="" : msg(48,1)="PAU1"
+msg(49,0)="Your full cooperation would be" : msg(49,1)=240
+msg(50,0)="deeply appreciated. However, should" : msg(50,1)=260
+msg(51,0)="you refuse or fail, the C.I.A. will" : msg(51,1)=280
+msg(52,0)="disavow any knowledge of your" : msg(52,1)=300
+msg(53,0)="participation in this action." : msg(53,1)=320
+msg(54,0)="" : msg(54,1)="PAU1"
+msg(55,0)="      Sincerely," : msg(55,1)=360
+msg(56,0)="      (IDENTITY CLASSIFIED)" : msg(56,1)=380
+msg(57,0)="      Director of Special Agents" : msg(57,1)=400
+msg(58,0)="      Washington, D.C." : msg(58,1)=420
+msg(59,0)="" : msg(59,1)="WAITRETURN"
+msg(60,0)="" : msg(60,1)="CLS"
+msg(61,0)="OPERATION BRIEF:" : msg(61,1)=0
+msg(62,0)="" : msg(62,1)="PAU1"
+msg(63,0)="Intelligence reports indicate that" : msg(63,1)=40
+msg(64,0)="Alexander Cherkazov, a top Russian" : msg(64,1)=60
+msg(65,0)="scientist and political strategist" : msg(65,1)=80
+msg(66,0)="has formulated a simple, yet" : msg(66,1)=100
+msg(67,0)="devastating plan to overthrow the" : msg(67,1)=120
+msg(68,0)="Government of the United States." : msg(68,1)=140
+msg(69,0)="" : msg(69,1)="PAU1"
+msg(70,0)="It is believed that the contents of" : msg(70,1)=160
+msg(71,0)="this 'Doomsday Paper' could shift" : msg(71,1)=180
+msg(72,0)="the balance of power and jeopardize" : msg(72,1)=200
+msg(73,0)="the entire free world." : msg(73,1)=220
+msg(74,0)="" : msg(74,1)="PAU2"
+msg(75,0)="The only known copies of this plan" : msg(75,1)=260
+msg(76,0)="are safely hidden within a vault" : msg(76,1)=280
+msg(77,0)="inside a military complex in Siberia." : msg(77,1)=300
+msg(78,0)="" : msg(78,1)="PAU1"
+msg(79,0)="By obtaining a copy of this plan," : msg(79,1)=320
+msg(80,0)="the C.I.A. could implement safeguards" : msg(80,1)=340
+msg(81,0)="against such a scheme." : msg(81,1)=360
+msg(82,0)="(RETURN)" : msg(82,1)=380
+msg(83,0)="" : msg(83,1)="WAITRETURN"
+msg(84,0)="" : msg(84,1)="CLS"
+msg(85,0)="Our agents have been able to place 3" : msg(85,1)=0
+msg(86,0)="Mobile Remote Units (MRU's) within" : msg(86,1)=20
+msg(87,0)="the military complex. Each MRU has" : msg(87,1)=40
+msg(88,0)="been equipped with a Remote Optical" : msg(88,1)=60
+msg(89,0)="Analyzer (ROA) for the express" : msg(89,1)=80
+msg(90,0)="purpose of gathering intelligence." : msg(90,1)=100
+msg(91,0)="" : msg(91,1)="MRUPIC"
+msg(92,0)="Remove a copy of the document marked" : msg(92,1)=250
+msg(93,0)="'CLASSIFIED' from the vault and" : msg(93,1)=270
+msg(94,0)="deliver it to our agent waiting at" : msg(94,1)=290
+msg(95,0)="the entrance. Pieces of the vault's" : msg(95,1)=310
+msg(96,0)="combination are hidden in 4 filing" : msg(96,1)=330
+msg(97,0)="cabinets. The access code to one of" : msg(97,1)=350
+msg(98,0)="the cabinets is 'RED 7'." : msg(98,1)=370
+msg(99,0)="(RETURN)" : msg(99,1)=390
+msg(100,0)="" : msg(100,1)="WAITRETURN"
+msg(101,0)="" : msg(101,1)="CLS"
+msg(102,0)="" : msg(102,1)="MFSMPIC"
+msg(103,0)="A Multi-Function Switching Matrix" : msg(103,1)=240
+msg(104,0)="(MFSM) has been planted in the" : msg(104,1)=260
+msg(105,0)="building to aid you in avoiding" : msg(105,1)=280
+msg(106,0)="detection. Familiarize yourself with" : msg(106,1)=300
+msg(107,0)="the construction of the MFSM by" : msg(107,1)=320
+msg(108,0)="identifying sections of the block" : msg(108,1)=340
+msg(109,0)="diagram." : msg(109,1)=360
+msg(110,0)="(RETURN)" : msg(110,1)=380
+msg(111,0)="" : msg(111,1)="WAITRETURN"
+msg(112,0)="" : msg(112,1)="CLEARLOWER"
+msg(113,0)="INPUT FROM SURVEILLANCE CAMERAS:" : msg(113,1)=240
+msg(114,0)="" : msg(114,1)="Q2"
+msg(115,0)="                                 " : msg(115,1)=240
+msg(116,0)="" : msg(116,1)="CHECKANSWER"
+msg(117,0)="INPUT FROM PRE-RECORDED TAPES:  " : msg(117,1)=260
+msg(118,0)="" : msg(118,1)="Q3"
+msg(119,0)="                                 " : msg(119,1)=260
+msg(120,0)="" : msg(120,1)="CHECKANSWER"
+msg(121,0)="CAMERA BYPASS SWITCH:           " : msg(121,1)=280
+msg(122,0)="" : msg(122,1)="Q6"
+msg(123,0)="                                 " : msg(123,1)=280
+msg(124,0)="" : msg(124,1)="CHECKANSWER"
+msg(125,0)="OUTPUT TO SECURITY MONITORS:    " : msg(125,1)=300
+msg(126,0)="" : msg(126,1)="Q4"
+msg(127,0)="                                 " : msg(127,1)=300
+msg(128,0)="" : msg(128,1)="CHECKANSWER"
+msg(129,0)="INPUT FROM MFSM PANEL CONTROLS: " : msg(129,1)=320
+msg(130,0)="" : msg(130,1)="Q1"
+msg(131,0)="                                 " : msg(131,1)=320
+msg(132,0)="" : msg(132,1)="CHECKANSWER"
+msg(133,0)="PHNORDMAN VIDEO MATRIX (PVM):   " : msg(133,1)=340
+msg(134,0)="" : msg(134,1)="Q7"
+msg(135,0)="                                 " : msg(135,1)=340
+msg(136,0)="" : msg(136,1)="CHECKANSWER"
+msg(137,0)="OUTPUT TO MFSM DISPLAY:         " : msg(137,1)=360
+msg(138,0)="" : msg(138,1)="Q5"
+msg(139,0)="                                 " : msg(139,1)=360
+msg(140,0)="" : msg(140,1)="CHECKANSWER"
+msg(141,0)="MFSM REVIEW COMPLETE-   (RETURN) " : msg(141,1)=380
+msg(142,0)="" : msg(142,1)="WAITRETURN"
+msg(143,0)="" : msg(143,1)="CLS"
+msg(144,0)="" : msg(144,1)="GUIPIC"
+msg(145,0)="Press button to correctly identify" : msg(145,1)=0
+msg(146,0)="MFSM panel controls-" : msg(146,1)=20
+msg(147,0)="SELECT 1 OF 4 DISPLAY SCREENS:" : msg(147,1)=60
+msg(148,0)="" : msg(148,1)="M1"
+msg(149,0)="INCORRECT RESPONSE" : msg(149,1)=60
+msg(150,0)="" : msg(150,1)="GOBACK"
+msg(151,0)="ADJUST VERTICAL HOLD:" : msg(151,1)=80
+msg(152,0)="" : msg(152,1)="M2"
+msg(153,0)="INCORRECT RESPONSE" : msg(153,1)=80
+msg(154,0)="" : msg(154,1)="GOBACK"
+msg(155,0)="MONITOR 1 OF 38 LIVE CAMERAS:" : msg(155,1)=100
+msg(156,0)="" : msg(156,1)="M3"
+msg(157,0)="INCORRECT RESPONSE" : msg(157,1)=100
+msg(158,0)="" : msg(158,1)="GOBACK"
+msg(159,0)="VIEW 1 OF 38 PRE-RECORDED TAPES:" : msg(159,1)=120
+msg(160,0)="" : msg(160,1)="M5"
+msg(161,0)="INCORRECT RESPONSE" : msg(161,1)=120
+msg(162,0)="" : msg(162,1)="GOBACK"
+msg(163,0)="INTERCEPT 1 OF 2 SECURITY MONITORS:" : msg(163,1)=140
+msg(164,0)="" : msg(164,1)="M4"
+msg(165,0)="INCORRECT RESPONSE" : msg(165,1)=140
+msg(166,0)="" : msg(166,1)="GOBACK"
+msg(167,0)="ENABLE TELEMETRY GUIDANCE SYSTEM:" : msg(167,1)=160
+msg(168,0)="" : msg(168,1)="M9"
+msg(169,0)="INCORRECT RESPONSE" : msg(169,1)=160
+msg(170,0)="" : msg(170,1)="GOBACK"
+;msg(171,0)="BYPASS CAMERA WITH VIDEO TAPE:" : msg(171,1)=180
+;msg(172,0)="" : msg(172,1)="HM6"
+;msg(173,0)="IDENTIFICATION SEQUENCE COMPLETE-" : msg(173,1)=200
+;msg(174,0)="" : msg(174,1)="PAU1"
+;msg(175,0)="Refer to MFSM user's manual for" : msg(175,1)=240
+;msg(176,0)="additional information." : msg(176,1)=260
+;msg(177,0)="" : msg(177,1)="PAU1"
+;msg(178,0)="For future reference, use logon I.D." : msg(178,1)=300
+;msg(179,0)="number: 00987" : msg(179,1)=320
+;msg(180,0)="" : msg(180,1)="PAU1"
+;msg(181,0)="Press (RETURN) to run MFSM emulator." : msg(181,1)=360
+;msg(182,0)="" : msg(182,1)="WAITRETURN"
+;msg(183,0)="" : msg(183,1)="GUISWITCH"
+
+;Initialising the game
+guidisplay=0
+textdisplay=1
+showcursor=0
+a=0 : b=144
+
+;---------------------
+;Game Loop
+;---------------------
+While Not KeyDown(1)
+
+If guigo=1 And textdisplay=0
+
+If KeyDown( 200 )=True Then MoveEntity sphere1,0,0.1,0
+If KeyDown( 208 )=True Then MoveEntity sphere1,0,-0.1,0
+
+For i = 1 To 4
+;Various vholdspeed# and vholdpos# operations
+	If vholdspeed#(i) > 40
+		vholdspeed#(i) = -32
+	ElseIf vholdspeed#(i) < -32
+		vholdspeed#(i) = 40
+	EndIf
+	If vholdspeed#(i) <> 0
+		vholdpos#(i)=vholdpos#(i)+vholdspeed#(i)
+	Else
+		If vholdpos#(i) <> 0
+			If vholdpos#(i) >= 70 Then vholdpos#(i)=vholdpos#(i)+2 Else vholdpos#(i)=vholdpos#(i)-2
+		EndIf
+	EndIf
+	If vholdpos#(i) >= 140+bandheight
+		vholdpos#(i)=0
+	ElseIf vholdpos#(i) <= 0
+		vholdpos#(i)=140+bandheight
+	EndIf
+
+	If i=1
+		HideEntity sphere(1) : HideEntity sphere(2) : HideEntity sphere(3) : HideEntity sphere(4)
+		GrabImage port(i),77,19
+	ElseIf i=2
+		HideEntity sphere(1) : HideEntity sphere(2) : HideEntity sphere(3) : HideEntity sphere(4)
+		GrabImage port(i),397,19
+	ElseIf i=3
+		HideEntity sphere(1) : HideEntity sphere(2) : HideEntity sphere(3) : HideEntity sphere(4)
+		GrabImage port(i),77,223
+	Else
+		HideEntity sphere(1) : HideEntity sphere(2) : HideEntity sphere(3) : HideEntity sphere(4)
+		GrabImage port(i),397,223
+	EndIf
+	
+	ShowEntity sphere(i)
+	
+	SetBuffer ImageBuffer(port(i)) ;Video effects - Scanlines and timestamp
+	Color 0,0,0
+	Rect 49,120,114,20
+	For p=1 To 140 Step 2 : Rect 0,p,212,1 : Next ;Scanlines
+	Color 255,255,255
+	Text 85,125,"00:00"
+	SetBuffer BackBuffer()
+	
+	Cls
+	
+	For a=1 To 4
+		DrawBlockRect port(a),portxpos(a),portypos(a),0,vholdpos#(a),212,140-vholdpos#(a)
+		DrawBlockRect port(a),portxpos(a),portypos(a)+(140-vholdpos#(a))+bandheight,0,0,212,140-(140-vholdpos#(a))-bandheight
+	Next
+	
+	DrawImage guilayer,0,0
+
+	DrawImage cursor,MouseX()-7,MouseY()-2
+	
+	Gosub cursorcheck
+	
+	Text 0,0,monselected
+	
+	Flip
+	
+	RenderWorld
+Next
+
+EndIf ;guigo=1
+
+;-------------
+
+If guigo=0 And textdisplay=1
+	
+	Gosub printtext
+
+	DrawImage textbackground,0,0
+	DrawImage textlayer,textleftoffset-2,0
+	
+	Gosub cursorcheck
+
+	Flip
+
+EndIf ;guigo=0
+
+Wend
+
+End
+
+;END OF MAIN GAME CODE
+;-------------
+
+;SUBROUTINE DEALING WITH THE TEXT
+.printtext
+
+If MilliSecs()>time+typepause
+	If needtoreseta=1 : a=0 : needtoreseta=0 : EndIf
+	If msg(b,1)="CLS"
+		FlushKeys
+		SetBuffer ImageBuffer(textlayer) : Cls : SetBuffer BackBuffer() : a=0 : b=b+1 : Delay 500
+	ElseIf msg(b,1)="DIAL"
+		pausetime#=5000+MilliSecs()
+		While MilliSecs() <= pausetime#
+			DrawImage textbackground,0,0 : DrawImage textlayer,textleftoffset-2,0 : Gosub cursorcheck : Flip
+		Wend
+		a=0 : b=b+1 ;Play the dialing sounds
+	ElseIf msg(b,1)="GOBACK"
+		pausetime#=1000+MilliSecs()
+		While MilliSecs() <= pausetime#
+			DrawImage textbackground,0,0 : DrawImage textlayer,textleftoffset-2,0 : Gosub cursorcheck : Flip
+		Wend
+		SetBuffer ImageBuffer(textlayer) : Color 0,0,0 : Rect 0,msg(b-1,1),640,20,1 : Color 255,255,255 : SetBuffer BackBuffer() : a=0 : b=b-3
+	ElseIf Left$(msg(b,1),3)="PAU"
+		pausetime# = Right$(msg(b,1),1) : pausetime#=pausetime#+MilliSecs()
+		While MilliSecs() <= pausetime#
+			DrawImage textbackground,0,0 : DrawImage textlayer,textleftoffset-2,0 : Gosub cursorcheck : Flip
+		Wend
+		;Delay (pausetime#*1000)
+		b=b+1
+	ElseIf msg(b,1)="LOGON"
+		Print ""
+		Print ""
+		Print ""
+		Print ""
+		;HideEntity textcursor
+		DrawImage textlayer,textleftoffset-2,0 : Flip
+		logonname$=Input(String$(" ",(textleftoffset/10)-1)+"LOGON PLEASE: ")
+		;ShowEntity textcursor
+		logonname$=Upper$(logonname$)
+		typepause=quicktypepause
+		msg(8,0)=msg(8,0)+logonname$
+		a=14
+		b=b+1
+	ElseIf msg(b,1)="Q2"
+		For l=1 To 12
+			Print ""
+		Next
+		;HideEntity textcursor
+		DrawImage textlayer,textleftoffset-2,0 : Flip
+		answer$=Input(String$(" ",(textleftoffset/10)-1)+"INPUT FROM SURVEILLANCE CAMERAS: ")
+		;ShowEntity textcursor
+		answer$=Upper$(answer$)
+		trueanswer$="2"
+		Gosub checkanswer
+	ElseIf msg(b,1)="Q3"
+		For l=1 To 13
+			Print ""
+		Next
+		;HideEntity textcursor
+		DrawImage textlayer,textleftoffset-2,0 : Flip
+		answer$=Input(String$(" ",(textleftoffset/10)-1)+"INPUT FROM PRE-RECORDED TAPES:   ")
+		;ShowEntity textcursor
+		answer$=Upper$(answer$)
+		trueanswer$="3"
+		Gosub checkanswer
+	ElseIf msg(b,1)="Q6"
+		For l=1 To 14
+			Print ""
+		Next
+		;HideEntity textcursor
+		DrawImage textlayer,textleftoffset-2,0 : Flip
+		answer$=Input(String$(" ",(textleftoffset/10)-1)+"CAMERA BYPASS SWITCH:            ")
+		;ShowEntity textcursor
+		answer$=Upper$(answer$)
+		trueanswer$="6"
+		Gosub checkanswer
+	ElseIf msg(b,1)="Q4"
+		For l=1 To 15
+			Print ""
+		Next
+		;HideEntity textcursor
+		DrawImage textlayer,textleftoffset-2,0 : Flip
+		answer$=Input(String$(" ",(textleftoffset/10)-1)+"OUTPUT TO SECURITY MONITORS:     ")
+		;ShowEntity textcursor
+		answer$=Upper$(answer$)
+		trueanswer$="4"
+		Gosub checkanswer
+	ElseIf msg(b,1)="Q1"
+		For l=1 To 16
+			Print ""
+		Next
+		;HideEntity textcursor
+		DrawImage textlayer,textleftoffset-2,0 : Flip
+		answer$=Input(String$(" ",(textleftoffset/10)-1)+"INPUT FROM MFSM PANEL CONTROLS:  ")
+		;ShowEntity textcursor
+		answer$=Upper$(answer$)
+		trueanswer$="1"
+		Gosub checkanswer
+	ElseIf msg(b,1)="Q7"
+		For l=1 To 17
+			Print ""
+		Next
+		;HideEntity textcursor
+		DrawImage textlayer,textleftoffset-2,0 : Flip
+		answer$=Input(String$(" ",(textleftoffset/10)-1)+"PHNORDMAN VIDEO MATRIX (PVM):    ")
+		;ShowEntity textcursor
+		answer$=Upper$(answer$)
+		trueanswer$="7"
+		Gosub checkanswer
+	ElseIf msg(b,1)="Q5"
+		For l=1 To 18
+			Print ""
+		Next
+		;HideEntity textcursor
+		DrawImage textlayer,textleftoffset-2,0 : Flip
+		answer$=Input(String$(" ",(textleftoffset/10)-1)+"OUTPUT TO MFSM DISPLAY:          ")
+		;ShowEntity textcursor
+		answer$=Upper$(answer$)
+		trueanswer$="5"
+		Gosub checkanswer
+	ElseIf Left$(msg(b,1),1)="M"
+		If buttonpress=Right$(msg(b,1),1)
+			a=0
+			b=b+3
+		ElseIf buttonpress<>0
+			SetBuffer ImageBuffer(textlayer) : Color 0,0,0 : Rect 0,msg(b-1,1),640,20,1 : Color 255,255,255 : SetBuffer BackBuffer()
+			a=0
+			b=b+1
+		EndIf	
+	ElseIf msg(b,1)="HM6"
+		If buttonpress=6 : showcursor=0 : a=0 : b=b+1 : EndIf
+	ElseIf msg(b,1)="GUISWITCH"
+		guigo=1 : textdisplay=0 : showcursor=1 : monselected=1
+	ElseIf msg(b,1)="RESETP"
+		typepause=normaltypepause
+		a=0 : b=b+1
+		If logonname$="00987" Then a=0 : b=171
+	ElseIf msg(b,1)="CHECKANSWER"
+		If answerwrong=0
+			a=0 : b=b+1
+		Else
+			SetBuffer ImageBuffer(textlayer) : Color 0,0,0 : Rect 0,msg(b-1,1),640,20,1 : Color 255,255,255 : SetBuffer BackBuffer()
+			Delay 500 : a=0 : b=b-3
+		EndIf
+	ElseIf msg(b,1)="SETQUICKP"
+		typepause=quicktypepause
+		a=0 : b=b+1
+	ElseIf msg(b,1)="MRUPIC"
+		;HideEntity textcursor
+		picnum=0
+		Repeat
+		picnum=picnum+1
+			SetBuffer ImageBuffer(textlayer)
+			DrawBlockRect mrupic,textleftoffset,140,0,0,500,picnum ;Image is 500 X 90 pixels
+			SetBuffer BackBuffer()
+			DrawImage textlayer,textleftoffset-2,0 : Flip
+		Until picnum=90
+		a=0 : b=b+1
+		;ShowEntity textcursor
+	ElseIf msg(b,1)="MFSMPIC"
+		;HideEntity textcursor
+		SetBuffer ImageBuffer(textbackground)
+		Color 136,136,136
+		Rect 0,0,640,480
+		Color 255,255,255
+		SetBuffer BackBuffer()
+		DrawImage textbackground,0,0
+		DrawImage textlayer,textleftoffset-2,0
+		picnum=0
+		Repeat
+		picnum=picnum+1
+			SetBuffer ImageBuffer(textlayer)
+			DrawBlockRect mfsmpic,textleftoffset-10,10,0,0,532,picnum ;Image is 532 X 214 pixels
+			SetBuffer BackBuffer()
+			DrawImage textlayer,textleftoffset-2,0 : Flip
+		Until picnum=214
+		a=0 : b=b+1
+		;ShowEntity textcursor
+	ElseIf msg(b,1)="GUIPIC"
+		;HideEntity textcursor
+		picnum=0
+		Repeat
+		picnum=picnum+1
+			SetBuffer ImageBuffer(textbackground)
+			DrawBlockRect guilayer,0,421,0,421,640,picnum
+			SetBuffer BackBuffer()
+			DrawImage textbackground,0,0 : Flip
+		Until picnum=59
+		showcursor=1
+		a=0 : b=b+1
+		;ShowEntity textcursor
+	ElseIf msg(b,1)="WAITRETURN"	
+		Repeat
+		Until KeyDown(28)=True
+		a=0
+		b=b+1
+		FlushKeys
+	ElseIf msg(b,1)="CLEARLOWER"
+	SetBuffer ImageBuffer(textlayer) : Color 0,0,0 : Rect 0,225,640,300,1 : Color 255,255,255 : SetBuffer BackBuffer() : a=0 : b=b+1 : Delay 500
+	Else
+		If a>Len(msg(b,0))
+		a=0
+		If b<linecount
+			b=b+1
+		EndIf
+		EndIf
+		a=a+1
+		time=MilliSecs()
+	EndIf
+EndIf
+
+SetBuffer ImageBuffer(textlayer)
+	Text 0,msg(b,1),Left$(msg(b,0),a)
+SetBuffer BackBuffer()
+
+Return
+
+.checkanswer
+	If answer$=trueanswer$
+		msg(b+1,0)="                                 "
+		msg(b+1,0)=msg(b+1,0)+answer$
+		answerwrong=0
+		a=33
+		b=b+1
+	Else
+		SetBuffer ImageBuffer(textlayer) : Color 0,0,0 : Rect 0,msg(b-1,1),640,20,1 : Color 255,255,255 : SetBuffer BackBuffer()
+		msg(b+1,0)="INCORRECT RESPONSE"
+		answerwrong=1
+		a=0
+		b=b+1
+	EndIf
+Return
+
+.cursorcheck
+If showcursor=1
+;Checking for mouseclicks over the GUI
+buttonpress=0 ; Cancel all button presses first
+If MouseDown(1)
+If MouseX()>28 And MouseX()<100 And MouseY()>433 And MouseY()<446 And mouseclick=0 Then buttonpress=1 : If monselected<4 : monselected=monselected+1 : Else : monselected=1 : EndIf : mouseclick=1
+If MouseX()>28 And MouseX()<100 And MouseY()>455 And MouseY()<468 And mouseclick=0 Then buttonpress=2 : mouseclick=1
+If MouseX()>128 And MouseX()<176 And MouseY()>433 And MouseY()<446 And mouseclick=0 Then buttonpress=3 : mouseclick=1
+If MouseX()>128 And MouseX()<176 And MouseY()>455 And MouseY()<468 And mouseclick=0 Then buttonpress=4 : mouseclick=1
+If MouseX()>192 And MouseX()<240 And MouseY()>433 And MouseY()<446 And mouseclick=0 Then buttonpress=5 : mouseclick=1
+If MouseX()>192 And MouseX()<240 And MouseY()>455 And MouseY()<468 And mouseclick=0 Then buttonpress=6 : mouseclick=1
+If MouseX()>256 And MouseX()<278 And MouseY()>433 And MouseY()<446 And mouseclick=0 Then buttonpress=7 : vholdspeed#(monselected)=vholdspeed#(monselected)-4 : mouseclick=1
+If MouseX()>282 And MouseX()<304 And MouseY()>433 And MouseY()<446 And mouseclick=0 Then buttonpress=8 : vholdspeed#(monselected)=vholdspeed#(monselected)+4 : mouseclick=1
+If MouseX()>256 And MouseX()<304 And MouseY()>455 And MouseY()<468 And mouseclick=0 Then buttonpress=9 : mouseclick=1
+If MouseX()>364 And MouseX()<388 And MouseY()>433 And MouseY()<446 And mouseclick=0 Then buttonpress=10 : mouseclick=1
+If MouseX()>332 And MouseX()<356 And MouseY()>444 And MouseY()<457 And mouseclick=0 Then buttonpress=11 : mouseclick=1
+If MouseX()>396 And MouseX()<420 And MouseY()>444 And MouseY()<457 And mouseclick=0 Then buttonpress=12 : mouseclick=1
+If MouseX()>364 And MouseX()<388 And MouseY()>455 And MouseY()<468 And mouseclick=0 Then buttonpress=13 : mouseclick=1
+If MouseX()>464 And MouseX()<496 And MouseY()>433 And MouseY()<446 And mouseclick=0 Then buttonpress=14 : mouseclick=1
+If MouseX()>512 And MouseX()<576 And MouseY()>433 And MouseY()<446 And mouseclick=0 Then buttonpress=15 : mouseclick=1
+If MouseX()>592 And MouseX()<624 And MouseY()>433 And MouseY()<446 And mouseclick=0 Then buttonpress=16 : mouseclick=1
+If MouseX()>464 And MouseX()<528 And MouseY()>455 And MouseY()<468 And mouseclick=0 Then buttonpress=17 : mouseclick=1
+If MouseX()>544 And MouseX()<624 And MouseY()>455 And MouseY()<468 And mouseclick=0 Then buttonpress=18 : mouseclick=1
+Else
+	mouseclick=0
+EndIf
+DrawImage cursor,MouseX()-7,MouseY()-2
+EndIf ;Showcursor=1
+Return
